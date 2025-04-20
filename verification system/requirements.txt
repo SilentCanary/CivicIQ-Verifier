@@ -1,0 +1,15 @@
+ultralytics-8.3.11
+pillow
+deepface
+opencv-python
+numpy
+scikit-image
+scipy
+pytesseract
+face_recognition
+real-esrgan
+cmake
+dlib
+opencv-contrib-python
+fastapi
+uvicorn
