@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aadhaar Verify - Secure Identity Verification</title>
+    <style>
+        /* Base styles with enhanced color palette */ 
+        :root { 
+            --primary: #1e3a8a; 
+            --primary-light: #3b82f6; 
+            --primary-dark: #1e40af; 
+            --secondary: #f97316; 
+            --secondary-light: #fb923c; 
+            --secondary-dark: #ea580c; 
+            --accent: #8b5cf6; 
+            --accent-light: #a78bfa; 
+            --white: #ffffff; 
+            --gray-50: #f8fafc; 
+            --gray-100: #f1f5f9; 
+            --gray-200: #e2e8f0; 
+            --gray-300: #cbd5e1; 
+            --gray-400: #94a3b8; 
+            --gray-500: #64748b; 
+            --gray-600: #475569; 
+            --gray-700: #334155; 
+            --gray-800: #1e293b; 
+            --gray-900: #0f172a; 
+            --success: #10b981; 
+            --error: #ef4444; 
+        }
+
+        * {
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+        }
+        
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; 
+            line-height: 1.5; 
+            color: var(--gray-800); 
+            min-height: 100vh; 
+            background-color: var(--gray-50); 
+            transition: background-color 0.3s ease;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Main Layout */ 
+        .min-h-screen { 
+            min-height: 100vh; 
+        }
+
+        .flex { 
+            display: flex; 
+        }
+
+        .flex-col { 
+            flex-direction: column; 
+        }
+
+        .flex-grow { 
+            flex-grow: 1; 
+        }
+
+        .container { 
+            width: 100%; 
+            max-width: 1200px; 
+            margin: 0 auto; 
+        }
+
+        .mx-auto { 
+            margin-left: auto; 
+            margin-right: auto; 
+        }
+
+        .px-4 { 
+            padding-left: 1rem; 
+            padding-right: 1rem; 
+        }
+
+        .py-8 { 
+            padding-top: 2rem; 
+            padding-bottom: 2rem; 
+        }
+
+        .space-y-8 > * + * { 
+            margin-top: 2rem; 
+        }
+
+        .grid { 
+            display: grid; 
+        }
+
+        .gap-6 { 
+            gap: 1.5rem; 
+        }
+
+        .mt-4 { 
+            margin-top: 1rem; 
+        }
+
+        @media (min-width: 768px) { 
+            .md-grid-cols-2 { 
+                grid-template-columns: repeat(2, minmax(0, 1fr)); 
+            } 
+        }
+
+        /* Header with gradient animation */ 
+        header { 
+            background: linear-gradient(-45deg, var(--primary-dark), var(--primary), var(--primary-light), var(--accent)); 
+            background-size: 400% 400%; 
+            animation: gradient-shift 15s ease infinite; 
+            padding: 1rem 0; 
+            color: var(--white); 
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); 
+        }
+
+        @keyframes gradient-shift { 
+            0% { background-position: 0% 50%; } 
+            50% { background-position: 100% 50%; } 
+            100% { background-position: 0% 50%; } 
+        }
+
+        .header-content { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+        }
+
+        .logo { 
+            display: flex; 
+            align-items: center; 
+            gap: 0.5rem; 
+            color: var(--white); 
+            text-decoration: none; 
+            position: relative; 
+            transition: transform 0.3s ease; 
+        }
+
+        .logo:hover { 
+            transform: translateY(-2px); 
+        }
+
+        .logo-text { 
+            font-size: 1.5rem; 
+            font-weight: bold; 
+        }
+
+        .logo-subtext { 
+            font-size: 0.875rem; 
+            color: var(--gray-200); 
+        }
+
+        .nav-links { 
+            display: flex; 
+            gap: 1.5rem; 
+        }
+
+        .nav-links a { 
+            color: var(--white); 
+            text-decoration: none; 
+            position: relative; 
+            padding: 0.25rem 0; 
+            font-weight: 500; 
+        }
+
+        .nav-links a::after { 
+            content: ''; 
+            position: absolute; 
+            width: 0; 
+            height: 2px; 
+            bottom: 0; 
+            left: 0; 
+            background-color: var(--secondary); 
+            transition: width 0.3s ease; 
+        }
+
+        .nav-links a:hover::after { 
+            width: 100%; 
+        }
+
+        /* Aadhaar Uploader */ 
+        .uploader-box { 
+            border: 2px dashed var(--gray-300); 
+            border-radius: 0.75rem; 
+            padding: 2rem; 
+            text-align: center; 
+            cursor: pointer; 
+            transition: all 0.3s ease; 
+            background-color: var(--gray-50); 
+            position: relative; 
+            overflow: hidden; 
+            height: 100%; 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: center; 
+            align-items: center; 
+        }
+
+        .uploader-box::before { 
+            content: ''; 
+            position: absolute; 
+            top: -50%; 
+            left: -50%; 
+            width: 200%; 
+            height: 200%; 
+            background: linear-gradient( to bottom right, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.3) 50%, rgba(255, 255, 255, 0) 100% ); 
+            transform: rotate(45deg); 
+            transition: all 1.5s ease; 
+            opacity: 0; 
+        }
+
+        .uploader-box:hover::before { 
+            animation: shine 2s infinite; 
+        }
+
+        @keyframes shine { 
+            0% { transform: translateX(-100%) rotate(45deg); opacity: 0; } 
+            20% { opacity: 0.5; } 
+            100% { transform: translateX(100%) rotate(45deg); opacity: 0; } 
+        }
+
+        .uploader-box:hover { 
+            border-color: var(--primary-light); 
+            background: linear-gradient(to bottom right, var(--gray-50), var(--white)); 
+            transform: translateY(-4px); 
+            box-shadow: 0 6px 12px rgba(59, 130, 246, 0.1); 
+        }
+
+        .uploader-active { 
+            border-color: var(--primary); 
+            background: linear-gradient(to bottom, var(--gray-50), var(--white)); 
+            animation: pulse-border 1.5s infinite; 
+        }
+
+        @keyframes pulse-border { 
+            0% { border-color: var(--primary-light); } 
+            50% { border-color: var(--accent-light); } 
+            100% { border-color: var(--primary-light); } 
+        }
+
+        .uploaded-preview { 
+            width: 100%; 
+            max-height: 200px; 
+            object-fit: contain; 
+            margin-bottom: 1rem; 
+            border-radius: 0.5rem; 
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); 
+            transition: transform 0.3s ease; 
+        }
+
+        .uploaded-preview:hover { 
+            transform: scale(1.05); 
+        }
+
+        .uploader-icon { 
+            font-size: 2rem; 
+            color: var(--gray-400); 
+            margin-bottom: 1rem; 
+            transition: transform 0.3s ease, color 0.3s ease; 
+        }
+
+        .uploader-box:hover .uploader-icon { 
+            color: var(--primary); 
+            transform: translateY(-4px); 
+        }
+
+        .uploader-text { 
+            font-size: 1.125rem; 
+            margin-bottom: 0.5rem; 
+            color: var(--gray-700); 
+            transition: color 0.3s ease; 
+        }
+
+        .uploader-box:hover .uploader-text { 
+            color: var(--primary); 
+        }
+
+        .uploader-subtext { 
+            color: var(--gray-500); 
+            font-size: 0.875rem; 
+        }
+
+        /* Verification Options */ 
+        .verification-options { 
+            background: var(--white); 
+            border-radius: 0.75rem; 
+            padding: 1.5rem; 
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); 
+            transition: all 0.3s ease; 
+        }
+
+        .verification-options:hover { 
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08); 
+        }
+
+        .verification-title { 
+            font-size: 1.25rem; 
+            color: var(--gray-800); 
+            margin-bottom: 1rem; 
+            position: relative; 
+            padding-bottom: 0.5rem; 
+        }
+
+        .verification-title::after { 
+            content: ''; 
+            position: absolute; 
+            left: 0; 
+            bottom: 0; 
+            height: 3px; 
+            width: 50px; 
+            background: linear-gradient(to right, var(--primary-light), var(--accent)); 
+        }
+
+        .button-container { 
+            display: flex; 
+            flex-wrap: wrap; 
+            gap: 1rem; 
+            margin-top: 1rem; 
+        }
+
+        .btn { 
+            display: inline-flex; 
+            align-items: center; 
+            justify-content: center; 
+            gap: 0.5rem; 
+            padding: 0.75rem 1.5rem; 
+            border-radius: 0.5rem; 
+            font-weight: 500; 
+            cursor: pointer; 
+            transition: all 0.3s ease; 
+            position: relative; 
+            overflow: hidden; 
+        }
+
+        .btn-primary { 
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark)); 
+            color: var(--white); 
+            border: none; 
+            box-shadow: 0 4px 6px rgba(30, 58, 138, 0.2); 
+        }
+
+        .btn-primary:hover { 
+            background: linear-gradient(135deg, var(--primary-dark), var(--primary)); 
+            transform: translateY(-2px); 
+            box-shadow: 0 6px 10px rgba(30, 58, 138, 0.3); 
+        }
+
+        .btn-primary:active { 
+            transform: translateY(0); 
+            box-shadow: 0 2px 4px rgba(30, 58, 138, 0.2); 
+        }
+
+        .btn-secondary { 
+            background: var(--white); 
+            color: var(--primary); 
+            border: 1px solid var(--primary); 
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05); 
+        }
+
+        .btn-secondary:hover { 
+            background: var(--gray-50); 
+            transform: translateY(-2px); 
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); 
+        }
+
+        .btn-secondary:active { 
+            transform: translateY(0); 
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05); 
+        }
+
+        .btn::after { 
+            content: ''; 
+            position: absolute; 
+            width: 30px; 
+            height: 100%; 
+            top: 0; 
+            left: -100px; 
+            background: linear-gradient( to right, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.3) 50%, rgba(255, 255, 255, 0) 100% ); 
+            transform: skewX(-25deg); 
+            transition: all 0.75s ease; 
+        }
+
+        .btn:hover::after { 
+            animation: btn-shine 1.5s ease; 
+        }
+
+        @keyframes btn-shine { 
+            100% { left: 150%; } 
+        }
+
+        .btn:disabled { 
+            background: var(--gray-300); 
+            color: var(--gray-500); 
+            cursor: not-allowed; 
+            box-shadow: none; 
+            transform: none; 
+        }
+
+        .text-green-600 { 
+            color: var(--success); 
+            animation: fadeInUp 0.5s ease forwards; 
+        }
+
+        .text-red-600 { 
+            color: var(--error); 
+            animation: fadeInUp 0.5s ease forwards; 
+        }
+
+        @keyframes fadeInUp { 
+            from { opacity: 0; transform: translateY(10px); } 
+            to { opacity: 1; transform: translateY(0); } 
+        }
+
+        .font-medium { 
+            font-weight: 500; 
+        }
+
+        /* Status indicators */ 
+        .status-indicator { 
+            display: inline-flex; 
+            align-items: center; 
+            gap: 0.5rem; 
+            padding: 0.5rem 1rem; 
+            border-radius: 0.25rem; 
+            font-weight: 500; 
+            font-size: 0.875rem; 
+            margin-top: 1rem; 
+            animation: fadeIn 0.5s ease forwards; 
+        }
+
+        .status-verifying { 
+            background-color: rgba(59, 130, 246, 0.1); 
+            color: var(--primary); 
+            position: relative; 
+        }
+
+        .status-verifying::before { 
+            content: ''; 
+            width: 0.75rem; 
+            height: 0.75rem; 
+            border-radius: 50%; 
+            border: 2px solid var(--primary); 
+            border-right-color: transparent; 
+            display: inline-block; 
+            animation: spin 1s linear infinite; 
+        }
+
+        @keyframes spin { 
+            0% { transform: rotate(0deg); } 
+            100% { transform: rotate(360deg); } 
+        }
+
+        /* Footer */ 
+        footer { 
+            background: linear-gradient(to right, var(--gray-800), var(--gray-900)); 
+            color: var(--gray-200); 
+            padding: 2rem 0 1rem; 
+            position: relative; 
+            overflow: hidden; 
+            margin-top: auto;
+        }
+
+        footer::before { 
+            content: ''; 
+            position: absolute; 
+            top: 0; 
+            left: 0; 
+            right: 0; 
+            height: 3px; 
+            background: linear-gradient(to right, var(--primary-light), var(--accent), var(--secondary)); 
+        }
+
+        .footer-content { 
+            display: grid; 
+            grid-template-columns: 1fr; 
+            gap: 2rem; 
+        }
+
+        @media (min-width: 768px) { 
+            .footer-content { 
+                grid-template-columns: repeat(3, 1fr); 
+            } 
+        }
+
+        .footer-brand { 
+            color: var(--white); 
+        }
+
+        .footer-brand p { 
+            color: var(--gray-400); 
+            margin-top: 0.5rem; 
+            font-size: 0.875rem; 
+        }
+
+        .copyright { 
+            text-align: center; 
+            padding-top: 1.5rem; 
+            margin-top: 1.5rem; 
+            border-top: 1px solid var(--gray-700); 
+            color: var(--gray-500); 
+            font-size: 0.875rem; 
+        }
+
+        /* Animation utilities */ 
+        @keyframes fadeIn { 
+            from { opacity: 0; transform: translateY(10px); } 
+            to { opacity: 1; transform: translateY(0); } 
+        }
+
+        .fade-in { 
+            animation: fadeIn 0.6s ease-out forwards; 
+        }
+
+        .fade-in-delay-1 { 
+            animation: fadeIn 0.6s ease-out 0.1s forwards; 
+            opacity: 0; 
+        }
+
+        .fade-in-delay-2 { 
+            animation: fadeIn 0.6s ease-out 0.2s forwards; 
+            opacity: 0; 
+        }
+
+        /* Additional classes for layout */
+        .main-content {
+            padding: 2rem 0;
+            flex-grow: 1;
+        }
+
+        .uploader-section {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+
+        @media (min-width: 768px) {
+            .uploader-section {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .status-section {
+            margin-top: 1.5rem;
+        }
+
+        .verification-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        @media (min-width: 640px) {
+            .verification-buttons {
+                flex-direction: row;
+            }
+        }
+
+        .w-full {
+            width: 100%;
+        }
+
+        .verification-card {
+            background-color: var(--white);
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            margin-bottom: 2rem;
+        }
+
+        /* Icon placeholders */
+        .icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .icon-upload {
+            width: 3rem;
+            height: 3rem;
+            border: 2px solid var(--gray-400);
+            border-radius: 50%;
+            position: relative;
+        }
+
+        .icon-upload:before {
+            content: '';
+            width: 1.5rem;
+            height: 2px;
+            background-color: var(--gray-400);
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .icon-upload:after {
+            content: '';
+            width: 2px;
+            height: 1.5rem;
+            background-color: var(--gray-400);
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .icon-shield {
+            width: 1.5rem;
+            height: 1.5rem;
+            border: 2px solid currentColor;
+            border-radius: 50% 50% 0 0;
+            border-bottom: none;
+            position: relative;
+            margin-right: 0.5rem;
+        }
+
+        .icon-shield:after {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 40%;
+            width: 0.75rem;
+            height: 0.75rem;
+            border-left: 2px solid currentColor;
+            border-bottom: 2px solid currentColor;
+            transform: translateX(-50%) rotate(-45deg);
+        }
+
+        .status-success {
+            background-color: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            color: var(--success);
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-top: 1rem;
+            display: none;
+        }
+
+        .status-error {
+            background-color: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: var(--error);
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-top: 1rem;
+            display: none;
+        }
+
+        #result {
+            margin-top: 1rem;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            background-color: var(--gray-100);
+        }
+
+        .preview-image {
+            max-width: 100%;
+            max-height: 150px;
+            margin-top: 1rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <a href="#" class="logo">
+                    <span class="icon icon-shield"></span>
+                    <div>
+                        <span class="logo-text">Aadhaar Verify</span>
+                        <span class="logo-subtext">Secure Identity Verification</span>
+                    </div>
+                </a>
+                <nav class="nav-links">
+                    <a href="#">Home</a>
+                    <a href="#">About</a>
+                    <a href="#">Contact</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="container px-4">
+            <section class="verification-card fade-in">
+                <h2 class="verification-title">Aadhaar Card Verification</h2>
+                <p class="uploader-subtext">Upload both sides of your Aadhaar card for verification</p>
+                
+                <form id="verifyForm">
+                    <div class="uploader-section mt-4">
+                        <div class="w-full">
+                            <h3 class="font-medium">Aadhaar Front Side</h3>
+                            <div class="uploader-box" id="front-upload-box">
+                                <input type="file" id="front_img" name="front_img" accept="image/*" required style="display: none;">
+                                <div class="icon icon-upload"></div>
+                                <p class="uploader-text">Drag & drop or click to upload</p>
+                                <p class="uploader-subtext">JPG, PNG or WebP (max. 5MB)</p>
+                                <img id="front-preview" class="preview-image" style="display: none;">
+                            </div>
+                        </div>
+
+                        <div class="w-full">
+                            <h3 class="font-medium">Aadhaar Back Side</h3>
+                            <div class="uploader-box" id="back-upload-box">
+                                <input type="file" id="back_img" name="back_img" accept="image/*" required style="display: none;">
+                                <div class="icon icon-upload"></div>
+                                <p class="uploader-text">Drag & drop or click to upload</p>
+                                <p class="uploader-subtext">JPG, PNG or WebP (max. 5MB)</p>
+                                <img id="back-preview" class="preview-image" style="display: none;">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="verification-buttons">
+                        <button type="submit" class="btn btn-primary w-full">
+                            <span class="icon icon-shield"></span>
+                            Verify Aadhaar
+                        </button>
+                    </div>
+                </form>
+
+                <div id="status-verifying" class="status-indicator status-verifying" style="display: none;">
+                    <span>Verification in progress...</span>
+                </div>
+
+                <div id="status-success" class="status-success">
+                    <h3 class="font-medium">Verification Successful!</h3>
+                    <p>Your Aadhaar card has been successfully verified.</p>
+                </div>
+
+                <div id="status-error" class="status-error">
+                    <h3 class="font-medium">Verification Failed!</h3>
+                    <p>There was an error verifying your Aadhaar card. Please try again.</p>
+                </div>
+
+                <div id="result"></div>
+            </section>
+        </div>
+    </main>
+
+    <footer>
+        <div class="container px-4">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <div class="logo">
+                        <span class="icon icon-shield"></span>
+                        <span class="logo-text">Aadhaar Verify</span>
+                    </div>
+                    <p>Secure identity verification solution for all your needs</p>
+                </div>
+            </div>
+            <div class="copyright">
+                &copy; 2025 Aadhaar Verify. All rights reserved.
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        const form = document.getElementById('verifyForm');
+        const frontInput = document.getElementById('front_img');
+        const backInput = document.getElementById('back_img');
+        const frontUploadBox = document.getElementById('front-upload-box');
+        const backUploadBox = document.getElementById('back-upload-box');
+        const frontPreview = document.getElementById('front-preview');
+        const backPreview = document.getElementById('back-preview');
+        const resultDiv = document.getElementById('result');
+        const statusVerifying = document.getElementById('status-verifying');
+        const statusSuccess = document.getElementById('status-success');
+        const statusError = document.getElementById('status-error');
+
+        // Front image upload handling
+        frontUploadBox.addEventListener('click', () => {
+            frontInput.click();
+        });
+
+        frontInput.addEventListener('change', (e) => {
+            if (frontInput.files && frontInput.files[0]) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    frontPreview.src = e.target.result;
+                    frontPreview.style.display = 'block';
+                };
+                reader.readAsDataURL(frontInput.files[0]);
+                frontUploadBox.classList.add('uploader-active');
+            }
+        });
+
+        // Back image upload handling
+        backUploadBox.addEventListener('click', () => {
+            backInput.click();
+        });
+
+        backInput.addEventListener('change', (e) => {
+            if (backInput.files && backInput.files[0]) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    backPreview.src = e.target.result;
+                    backPreview.style.display = 'block';
+                };
+                reader.readAsDataURL(backInput.files[0]);
+                backUploadBox.classList.add('uploader-active');
+            }
+        });
+
+        // Form submission
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            // Reset status displays
+            statusSuccess.style.display = 'none';
+            statusError.style.display = 'none';
+            resultDiv.innerText = '';
+            
+            // Show verifying status
+            statusVerifying.style.display = 'inline-flex';
+
+            const formData = new FormData(form);
+
+            try {
+                const res = await fetch('http://localhost:3000/api/verify', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                // Hide verification status
+                statusVerifying.style.display = 'none';
+
+                const data = await res.json();
+                
+                // Display result
+                resultDiv.innerText = 'Server Response:\n' + JSON.stringify(data, null, 2);
+
+                // Show appropriate status message
+                if (res.ok) {
+                    statusSuccess.style.display = 'block';
+                } else {
+                    statusError.style.display = 'block';
+                }
+            } catch (err) {
+                // Hide verification status
+                statusVerifying.style.display = 'none';
+                
+                // Show error status
+                statusError.style.display = 'block';
+                resultDiv.innerText = 'Error: ' + err.message;
+            }
+        });
+
+        // Drag and drop functionality
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            frontUploadBox.addEventListener(eventName, preventDefaults, false);
+            backUploadBox.addEventListener(eventName, preventDefaults, false);
+        });
+
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            frontUploadBox.addEventListener(eventName, highlight, false);
+            backUploadBox.addEventListener(eventName, highlight, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            frontUploadBox.addEventListener(eventName, unhighlight, false);
+            backUploadBox.addEventListener(eventName, unhighlight, false);
+        });
+
+        function highlight(e) {
+            this.classList.add('uploader-active');
+        }
+
+        function unhighlight(e) {
+            this.classList.remove('uploader-active');
+        }
+
+        frontUploadBox.addEventListener('drop', handleFrontDrop, false);
+        backUploadBox.addEventListener('drop', handleBackDrop, false);
+
+        function handleFrontDrop(e) {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            if (files && files.length) {
+                frontInput.files = files;
+                const event = new Event('change');
+                frontUploadBox.addEventListener('drop', handleFrontDrop, false);
+backUploadBox.addEventListener('drop', handleBackDrop, false);
+
+function handleFrontDrop(e) {
+    const dt = e.dataTransfer;
+    const files = dt.files;
+    if (files && files.length) {
+        frontInput.files = files;
+        const event = new Event('change');
+        frontInput.dispatchEvent(event);
+    }
+}
+
+function handleBackDrop(e) {
+    const dt = e.dataTransfer;
+    const files = dt.files;
+    if (files && files.length) {
+        backInput.files = files;
+        const event = new Event('change');
+        backInput.dispatchEvent(event);
+    }
+}
+    }
+}
+
+        function handleBackDrop(e) {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            if (files && files.length) {
+                backInput.files = files;
+                const event = new Event('change');
+                backInput.dispatchEvent(event);
+            }
+        }
+    </script>
+
+</body>
+
+</html>
